@@ -55,13 +55,16 @@ export const register = async (input: RegisterInput) => {
     orgId = org.id;
     role = 'ADMIN';
   } else {
-    let defaultOrg = await prisma.organization.findUnique({ where: { slug: 'default' } });
-    if (!defaultOrg) {
-      defaultOrg = await prisma.organization.create({
+    // Join org by slug if provided, otherwise use default org
+    const slug = input.orgSlug ?? 'default';
+    let org = await prisma.organization.findUnique({ where: { slug } });
+    if (!org) {
+      // Create default org if it doesn't exist
+      org = await prisma.organization.create({
         data: { name: 'Default Organization', slug: 'default' },
       });
     }
-    orgId = defaultOrg.id;
+    orgId = org.id;
   }
 
   const user = await prisma.user.create({
