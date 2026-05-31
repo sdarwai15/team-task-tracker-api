@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  BLOCKED
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users    User[]
+  projects Project[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  orgId        String   @map("org_id")
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  role         Role     @default(MEMBER)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization   Organization   @relation(fields: [orgId], references: [id])
+  assignedTasks  Task[]         @relation("TaskAssignee")
+  createdTasks   Task[]         @relation("TaskCreator")
+  refreshTokens  RefreshToken[]
+
+  @@index([orgId])
+  @@index([email])
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  orgId       String   @map("org_id")
+  createdById String   @map("created_by")
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  tasks        Task[]
+
+  @@index([orgId])
+  @@map("projects")
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  projectId   String     @map("project_id")
+  orgId       String     @map("org_id")
+  assigneeId  String?    @map("assignee_id")
+  createdById String     @map("created_by")
+  title       String
+  description String?
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(TODO)
+  dueDate     DateTime?  @map("due_date")
+  completedAt DateTime?  @map("completed_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  project  Project @relation(fields: [projectId], references: [id])
+  assignee User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creator  User    @relation("TaskCreator", fields: [createdById], references: [id])
+
+  @@index([status])
+  @@index([assigneeId])
+  @@index([dueDate])
+  @@index([orgId])
+  @@index([projectId])
+  @@map("tasks")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
