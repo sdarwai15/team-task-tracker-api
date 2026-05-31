@@ -11,6 +11,7 @@ import { Role } from '@prisma/client';
 
 import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/users/users.routes';
+import projectRoutes from './modules/projects/projects.routes';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(morgan('dev'));
 // ── Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/projects', projectRoutes);
 
 // ── RBAC smoke-test routes (remove after verification) ─────────────────────
 app.get('/test/admin', authenticate, authorize(Role.ADMIN), (_req, res) => {
