@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { sseManager } from '../../lib/sseManager';
 import {
   taskEvents,
@@ -9,7 +9,7 @@ import {
 } from '../../lib/eventEmitter';
 
 export const subscribe = (req: Request, res: Response): void => {
-  const clientId = uuidv4();
+  const clientId = randomUUID();
   const userId = req.user!.sub;
   const orgId = req.user!.orgId;
 

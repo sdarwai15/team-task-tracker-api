@@ -17,7 +17,11 @@ const generateAccessToken = (userId: string, role: Role, orgId: string): string 
 
 const generateRefreshToken = (userId: string): string =>
   jwt.sign(
-    { sub: userId, exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 },
+    {
+      sub: userId,
+      exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
+      jti: Math.random().toString(36).slice(2), // unique token ID prevents hash collisions
+    },
     env.JWT_REFRESH_SECRET,
   );
 
