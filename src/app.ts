@@ -14,6 +14,7 @@ import userRoutes from './modules/users/users.routes';
 import projectRoutes from './modules/projects/projects.routes';
 import taskRoutes from './modules/tasks/tasks.routes';
 import analyticsRoutes from './modules/analytics/analytics.routes';
+import notificationRoutes from './modules/notifications/notifications.routes';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/projects', projectRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // ── RBAC smoke-test routes (remove after verification) ─────────────────────
 app.get('/test/admin', authenticate, authorize(Role.ADMIN), (_req, res) => {
