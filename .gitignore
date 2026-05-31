@@ -5,4 +5,4 @@ dist
 !.env.example
 coverage
 *.log
-/src/generated/prisma
+src-snapshot.zip
