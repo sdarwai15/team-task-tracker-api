@@ -6,3 +6,4 @@ dist
 coverage
 *.log
 src-snapshot.zip
+.DS_Store
