@@ -3,6 +3,7 @@ import { prisma } from '../../config/db';
 import { AppError, ErrorCode } from '../../lib/errors';
 import { canTransition, getAllowedTransitions } from '../../lib/statusMachine';
 import { getCache, setCache, invalidateTaskCaches, CacheKey } from '../../lib/cache';
+import { taskEvents, TaskEvent } from '../../lib/eventEmitter';
 import {
   CreateTaskInput,
   UpdateTaskInput,
@@ -209,6 +210,18 @@ export const updateTask = async (
     await invalidateTaskCaches(orgId, uid);
   }
 
+  // Emit SSE event if assignee changed
+  if (input.assigneeId && input.assigneeId !== task.assigneeId) {
+    taskEvents.emit(TaskEvent.ASSIGNED, {
+      taskId,
+      title: updated.title,
+      assigneeId: input.assigneeId,
+      orgId,
+      assignedBy: requestingUserId,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   return updated;
 };
 
@@ -263,6 +276,18 @@ export const updateTaskStatus = async (
 
   // Status change invalidates assignee cache
   await invalidateTaskCaches(orgId, task.assigneeId);
+
+  // Emit SSE event — notify assignee of status change
+  taskEvents.emit(TaskEvent.STATUS_CHANGED, {
+    taskId,
+    title: updated.title,
+    oldStatus: task.status,
+    newStatus,
+    assigneeId: task.assigneeId,
+    orgId,
+    changedBy: requestingUserId,
+    timestamp: new Date().toISOString(),
+  });
 
   return updated;
 };
