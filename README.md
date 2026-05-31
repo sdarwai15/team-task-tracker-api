@@ -25,8 +25,8 @@ The only prerequisite is Docker Desktop.
 
 ```bash
 # 1. Clone the repository
-git clone <your-repo-url>
-cd nxtwave
+git clone https://github.com/sdarwai15/team-task-tracker-api.git
+cd team-task-tracker-api
 
 # 2. Copy environment variables
 cp .env.example .env
