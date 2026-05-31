@@ -5,9 +5,6 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import { errorHandler } from './middleware/errorHandler';
-import { authenticate } from './middleware/auth';
-import { authorize } from './middleware/rbac';
-import { Role } from '@prisma/client';
 import swaggerUi from 'swagger-ui-express';
 
 import authRoutes from './modules/auth/auth.routes';
@@ -34,17 +31,6 @@ app.use('/api/v1/projects', projectRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
-
-// ── RBAC smoke-test routes (remove after verification) ─────────────────────
-app.get('/test/admin', authenticate, authorize(Role.ADMIN), (_req, res) => {
-  res.json({ message: 'You are an ADMIN' });
-});
-app.get('/test/manager', authenticate, authorize(Role.MANAGER, Role.ADMIN), (_req, res) => {
-  res.json({ message: 'You are a MANAGER or ADMIN' });
-});
-app.get('/test/member', authenticate, authorize(Role.MEMBER, Role.MANAGER, Role.ADMIN), (_req, res) => {
-  res.json({ message: 'You are authenticated' });
-});
 
 // ── Health check ───────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
