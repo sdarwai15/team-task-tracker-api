@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { authenticate } from './middleware/auth';
 import { authorize } from './middleware/rbac';
 import { Role } from '@prisma/client';
+import swaggerUi from 'swagger-ui-express';
 
 import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/users/users.routes';
@@ -15,6 +16,7 @@ import projectRoutes from './modules/projects/projects.routes';
 import taskRoutes from './modules/tasks/tasks.routes';
 import analyticsRoutes from './modules/analytics/analytics.routes';
 import notificationRoutes from './modules/notifications/notifications.routes';
+import { swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -47,6 +49,13 @@ app.get('/test/member', authenticate, authorize(Role.MEMBER, Role.MANAGER, Role.
 // ── Health check ───────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// ── Swagger UI ─────────────────────────────────────────────────────────────
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api/docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
 });
 
 // ── 404 handler ────────────────────────────────────────────────────────────
