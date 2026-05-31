@@ -3,11 +3,14 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
+
 import { errorHandler } from './middleware/errorHandler';
-import authRoutes from './modules/auth/auth.routes';
 import { authenticate } from './middleware/auth';
 import { authorize } from './middleware/rbac';
 import { Role } from '@prisma/client';
+
+import authRoutes from './modules/auth/auth.routes';
+import userRoutes from './modules/users/users.routes';
 
 const app = express();
 
@@ -20,6 +23,7 @@ app.use(morgan('dev'));
 
 // ── Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // ── RBAC smoke-test routes (remove after verification) ─────────────────────
 app.get('/test/admin', authenticate, authorize(Role.ADMIN), (_req, res) => {
